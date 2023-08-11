@@ -1,0 +1,62 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    id    String @id @default(cuid())
+    email String @unique
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    password     Password?
+    households   UserHousehold[]
+    transactions Transaction[]
+    inviteCodes  InviteCode[]
+}
+
+model Password {
+    hash String
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId String @unique
+}
+
+model InviteCode {
+    id        Int     @id @default(autoincrement())
+    code      String  @unique
+    used      Boolean @default(false)
+    createdBy String?
+    user      User?   @relation(fields: [createdBy], references: [id])
+}
+
+model Household {
+    id           Int             @id @default(autoincrement())
+    users        UserHousehold[]
+    transactions Transaction[]
+}
+
+model UserHousehold {
+    userId      String
+    householdId Int
+    user        User      @relation(fields: [userId], references: [id])
+    household   Household @relation(fields: [householdId], references: [id])
+
+    @@id([userId, householdId])
+}
+
+model Transaction {
+    id          Int       @id @default(autoincrement())
+    userId      String
+    householdId Int
+    date        DateTime
+    user        User      @relation(fields: [userId], references: [id])
+    household   Household @relation(fields: [householdId], references: [id])
+    type        String // Kann "Einnahme" oder "Ausgabe" sein
+    amount      Float
+}
