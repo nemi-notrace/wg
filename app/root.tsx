@@ -9,6 +9,7 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import { getUser } from "~/session.server";
+import { userHasHousehold } from "~/models/userHousholds.server";
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
@@ -17,12 +18,14 @@ export const loader = async ({ request }: LoaderArgs) => {
   try {
     const user = await getUser(request);
     if (!user) {
-      return json({ user: null });
+      return json({ user: null, hasHousehold: false });
     }
-    return json({ user });
+    const hasHousehold = await userHasHousehold("user.id");
+
+    return json({ user, hasHousehold });
   } catch (error) {
     console.error("Error fetching user:", error);
-    return json({ user: null });
+    return json({ user: null, hasHousehold: false });
   }
 };
 export default function App() {
