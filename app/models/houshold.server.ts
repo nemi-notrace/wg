@@ -3,21 +3,27 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // Household functions
-export async function createHousehold() {
+export async function createHousehold(name?: string) {
+  if (name === undefined) name = "New Household" + Math.random();
   return await prisma.household.create({
-    data: {},
+    data: { name: name },
   });
 }
 
-export async function getHouseholdById(id: number) {
+export async function getHouseholdById(id: string) {
   return await prisma.household.findUnique({
     where: { id: id },
+    include: {
+      users: true,
+    },
   });
 }
 
-export async function addUserToHousehold(userId: string, householdId: number) {
-  return await prisma.userHousehold.create({
-    data: {
+export async function addUserToHousehold(userId: string, householdId: string) {
+  return await prisma.userHousehold.upsert({
+    where: { userId_householdId: { userId, householdId } },
+    update: {},
+    create: {
       userId: userId,
       householdId: householdId,
     },
@@ -31,7 +37,7 @@ export async function createTransaction(data: any) {
   });
 }
 
-export async function getTransactionsByHousehold(householdId: number) {
+export async function getTransactionsByHousehold(householdId: string) {
   return await prisma.transaction.findMany({
     where: {
       householdId: householdId,
@@ -49,7 +55,7 @@ export async function getTransactionsByUser(userId: string) {
 
 export async function getTransactionsByUserAndHousehold(
   userId: string,
-  householdId: number
+  householdId: string
 ) {
   return await prisma.transaction.findMany({
     where: {
@@ -66,4 +72,20 @@ export async function closePrisma() {
 
 export async function getAllHouseholds() {
   return await prisma.household.findMany();
+}
+
+export async function getAllHousholdsOfUser(userId: string) {
+  return await prisma.userHousehold.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
+
+export async function getAllUsersOfHousehold(userId: string) {
+  return await prisma.userHousehold.findMany({
+    where: {
+      householdId: userId,
+    },
+  });
 }

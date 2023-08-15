@@ -14,20 +14,22 @@ import { userHasHousehold } from "~/models/userHousholds.server";
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
 ];
-export const loader = async ({ request }: LoaderArgs) => {
+
+export const loader = async ({ request, context }: LoaderArgs) => {
   try {
     const user = await getUser(request);
     if (!user) {
       return json({ user: null, hasHousehold: false });
     }
-    const hasHousehold = await userHasHousehold("user.id");
-
+    const hasHousehold = await userHasHousehold(user.id); // Corrected
+    context.user = user; // Pass the user data to the context
     return json({ user, hasHousehold });
   } catch (error) {
     console.error("Error fetching user:", error);
     return json({ user: null, hasHousehold: false });
   }
 };
+
 export default function App() {
   return (
     <html lang="en">

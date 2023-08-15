@@ -36,14 +36,15 @@ model InviteCode {
 }
 
 model Household {
-    id           Int             @id @default(autoincrement())
+    id           String          @id @default(cuid())
     users        UserHousehold[]
     transactions Transaction[]
+    name         String?         @default(cuid())
 }
 
 model UserHousehold {
     userId      String
-    householdId Int
+    householdId String
     user        User      @relation(fields: [userId], references: [id])
     household   Household @relation(fields: [householdId], references: [id])
 
@@ -53,7 +54,7 @@ model UserHousehold {
 model Transaction {
     id          Int       @id @default(autoincrement())
     userId      String
-    householdId Int
+    householdId String
     date        DateTime
     user        User      @relation(fields: [userId], references: [id])
     household   Household @relation(fields: [householdId], references: [id])
