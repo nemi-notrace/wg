@@ -8,7 +8,7 @@ import {
   getHouseholdById,
   getTransactionsByUserAndHousehold,
 } from "~/models/houshold.server";
-import { HouseholdTransactions } from "./households.$householdId";
+import { HouseholdTransactions } from "../components/transactionsView";
 import { parse } from "url";
 
 export const loader: LoaderFunction = async ({ request, context }) => {

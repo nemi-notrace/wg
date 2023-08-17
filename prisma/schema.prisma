@@ -18,6 +18,7 @@ model User {
     households   UserHousehold[]
     transactions Transaction[]
     inviteCodes  InviteCode[]
+    userStays    UserStay[]
 }
 
 model Password {
@@ -40,6 +41,7 @@ model Household {
     users        UserHousehold[]
     transactions Transaction[]
     name         String?         @default(cuid())
+    userStays    UserStay[]
 }
 
 model UserHousehold {
@@ -60,4 +62,17 @@ model Transaction {
     household   Household @relation(fields: [householdId], references: [id])
     type        String // Kann "Einnahme" oder "Ausgabe" sein
     amount      Float
+}
+
+model UserStay {
+    id          String    @id @default(cuid())
+    userId      String
+    householdId String
+    startDate   DateTime  @default(now())
+    endDate     DateTime?
+    weeks       Int
+    user        User      @relation(fields: [userId], references: [id])
+    household   Household @relation(fields: [householdId], references: [id])
+
+    @@unique([userId, householdId, startDate])
 }
